@@ -1,1 +1,1 @@
-project_name = "EGW-lab4"
+project_name = "lab_4"
