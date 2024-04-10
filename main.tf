@@ -6,21 +6,48 @@ provider "aws" {
 resource "aws_instance" "lab-4-ec2" {
   ami = "ami-0fb391cce7a602d1f"
   instance_type = "t2.micro"
-  key_name = "mod5" 
-  vpc_security_group_ids = [  ]
+  key_name = "lab4-key" 
+  vpc_security_group_ids = [aws_security_group.allow_ssh.id]
      tags = {
          Name = "lab4-server"
-         project = var.project.project_name
+         project = var.project_name
      }
+     depends_on = [aws_key_pair.lab4-keypair]
     }
+resource "aws_s3_bucket" "s3-bucket" {
+    bucket = var.s3_bucket_name
+  }
+resource "aws_security_group" "allow_ssh" {
+    name = var.security_group_name
+    description = "allow ssh access"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    tags = {
+        project = var.project_name
+    }
+}
 resource "aws_key_pair" "lab4-keypair" {
    key_name = "lab4-key"
-   public_key = ""
+   public_key = tls_private_key.lab4-priv-key.public_key_openssh
 }
 resource "tls_private_key" "lab4-priv-key" {
-  algorithm  = rsa
+  algorithm  = "RSA"
   rsa_bits = 4096
 }  
+resource "local_file" "TF_key" {
+    content = tls_private_key.lab4-priv-key.private_key_pem
+    filename = "tf_key"
+}
+
+output "lab4_vm_public_ip" {
+        value = aws_instance.lab-4-ec2.public_ip
+}
 
 # </Lab 4>
 # provider "aws" 
@@ -58,7 +85,4 @@ resource "tls_private_key" "lab4-priv-key" {
 #         Name = "Made by Terraform! -${local.project_name}"
 #     }
 #}
-# resource "aws_s3_bucket" "s3-bucket" {
-#     bucket = var.s3_bucket_name
-  
-# }
+
