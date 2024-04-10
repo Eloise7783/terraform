@@ -56,19 +56,6 @@ output "lab4_vm_public_ip" {
 #     # in resource block, provider = "aws.US"
 # }
 
-# resource "aws_instance" "demo1" {
-#     ami = "ami-09a2a0f7d2db8baca"
-#     instance_type = "t2.micro"
-#     user_data_replace_on_change = true
-#         user_data =<<-EOF
-#         #!/bin/bash
-#         sudo apt-get update -y
-#         sudo apt install mysql-client -y
-#         EOF
-#     tags = {
-#         Name = "Made by Terraform!"
-#     }
-# }
 # terraform fmt = adjusts syntax
 # terraform validate = validates options (NOT values)
 # terraform destroy -target=[resource_type.resource_name.resource_attribute] - not recommended
