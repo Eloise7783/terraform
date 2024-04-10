@@ -9,13 +9,13 @@ resource "aws_security_group" "ec2-rds" {
     ingress {
         from_port = 22 
         to_port = 22
-        protocol = tcp 
+        protocol = "tcp" 
         cidr_blocks = ["0.0.0.0/0"]
     }
     ingress {
         from_port = 80 
         to_port = 80
-        protocol = tcp 
+        protocol = "tcp"  
         cidr_blocks = ["0.0.0.0/0"]
     }
     egress {
@@ -30,7 +30,7 @@ resource "aws_security_group_rule" "ec2-to-rds" {
     type = "egress"
     from_port =  3306
     to_port = 3306
-    protocol = tcp
+    protocol = "tcp" 
     source_security_group_id = aws_security_group.rds-ec2.id
 }
 resource "aws_security_group_rule" "rds-to-ec2" {
@@ -38,8 +38,20 @@ resource "aws_security_group_rule" "rds-to-ec2" {
     security_group_id = aws_security_group.rds-ec2.id
     from_port = 3306
     to_port = 3306
-    protocol = tcp
+    protocol = "tcp" 
     source_security_group_id = aws_security_group.ec2-rds.id
+}
+resource "aws_key_pair" "lab4-keypair" {
+   key_name = "lab4-key"
+   public_key = tls_private_key.lab4-priv-key.public_key_openssh
+}
+resource "tls_private_key" "lab4-priv-key" {
+  algorithm  = "RSA"
+  rsa_bits = 4096
+}  
+resource "local_file" "TF_key" {
+    content = tls_private_key.lab4-priv-key.private_key_pem
+    filename = "tf_key"
 }
 resource "aws_instance" "db_ec2" {
     ami = "ami-0fb391cce7a602d1f"
@@ -52,12 +64,12 @@ resource "aws_instance" "db_ec2" {
         sudo apt install mysql-client -y
         EOF
   vpc_security_group_ids = [aws_security_group.ec2-rds.id]
-  depends_on             = [aws_key_pair.lab4-key]
+  depends_on             = [aws_key_pair.lab4-keypair]
 
 }
 resource "aws_db_subnet_group" "DB-subnet-group" {
-    name = "DB-subnet-group"
-    subnet_ids = [subnet-044f829aa2089d0e8, subnet-0b35e0abf26802a50, subnet-068d842ffe6ea82cb, subnet-0ec4e2b95810e319f, subnet-0dbbabcd430b1961d, subnet-0c532559ebc567734]
+    name = "db-subnet-group"
+    subnet_ids = ["subnet-044f829aa2089d0e8", "subnet-0b35e0abf26802a50", "subnet-068d842ffe6ea82cb", "subnet-0ec4e2b95810e319f", "subnet-0dbbabcd430b1961d", "subnet-0c532559ebc567734"]
 }
 resource "aws_db_instance" "terraformDb" {
     engine = "mysql"
@@ -75,9 +87,9 @@ resource "aws_db_instance" "terraformDb" {
 
 }
 output "ec2_public_ip_for_mysql" {
-  value = aws_instance.ec2_instance.public_ip
+  value = aws_instance.db_ec2.public_ip
 }
 
 output "rds_endpoint" {
-  value = aws_db_instance.db_instance.endpoint
+  value = aws_db_instance.terraformDb.endpoint
 }

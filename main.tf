@@ -32,18 +32,18 @@ resource "aws_security_group" "allow_ssh" {
         project = var.project_name
     }
 }
-resource "aws_key_pair" "lab4-keypair" {
-   key_name = "lab4-key"
-   public_key = tls_private_key.lab4-priv-key.public_key_openssh
-}
-resource "tls_private_key" "lab4-priv-key" {
-  algorithm  = "RSA"
-  rsa_bits = 4096
-}  
-resource "local_file" "TF_key" {
-    content = tls_private_key.lab4-priv-key.private_key_pem
-    filename = "tf_key"
-}
+# resource "aws_key_pair" "lab4-keypair" {
+#    key_name = "lab4-key"
+#    public_key = tls_private_key.lab4-priv-key.public_key_openssh
+# }
+# resource "tls_private_key" "lab4-priv-key" {
+#   algorithm  = "RSA"
+#   rsa_bits = 4096
+# }  
+# resource "local_file" "TF_key" {
+#     content = tls_private_key.lab4-priv-key.private_key_pem
+#     filename = "tf_key"
+# }
 
 output "lab4_vm_public_ip" {
         value = aws_instance.lab-4-ec2.public_ip
