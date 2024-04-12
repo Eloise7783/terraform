@@ -2,6 +2,20 @@ provider "aws" {
     profile = "default"
     region = "eu-west-2"
 }
+module "ec2-mod" {
+    count = 2
+    source = "./EC2"
+    subnet_id = var.subnet_ids[count.index]
+
+    tags = {
+        Name = "lab6-$(count.index)"
+    }
+}
+
+variable "subnet_ids" {
+    default = ["subnet-044f829aa2089d0e8", "subnet-0b35e0abf26802a50", "subnet-068d842ffe6ea82cb", "subnet-0ec4e2b95810e319f", "subnet-0dbbabcd430b1961d", "subnet-0c532559ebc567734"]
+  
+}
 resource "aws_vpc" "lab5-vpc" {
     cidr_block = "10.10.0.0/20"
     enable_dns_hostnames = true
